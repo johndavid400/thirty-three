@@ -1,0 +1,24 @@
+Hello fellow makers, my name is JD Warren and I would like to share some robotics projects with you. In this book, you will hopefully learn more about some popular concepts in robotics and maybe some interesting techniques in both hardware and software.
+
+To make things easier, we will not spend much time concentrating on the actual building of the robot for each chapter - that is best left to your own creativity and budget. We will instead focus on how to manipulate any mobile platform using the code we write for the Arduino. By understanding what your code is doing, you can change and tweak it for your specific platform. For chapters requiring a standard robot base, we will both build a simple frame and buy one from a well-known source and reuse the frame when possible, thus avoiding the complication of not being able to find the exact parts that I have used. The wonderful part about the Arduino (and software in general) is that you can make changes that will drastically effect the output of your robot, without modifying any hardware.
+
+There are a few chapters that will require some specific materials and thus will require special attention when assembling (the Quad-copter and Digital Cane).
+
+In my last book "Arduino Robotics", I tried to cover most of the important topics that would help a beginner to understand electronics and the Arduino in particular, so I will attempt to refrain from repeating myself when it is not necessary. However, there are some things that I feel are worth mentioning just in case... You likely already know the following hints, but here they are anyways.
+
+
+Electronics related:
+
+Digital - refers to an electrical signal that is either fully On or fully Off. Fully On means that the signal is at the level of the system operating voltage, VCC (usually +5v or +12v). Fully Off means that the signal is Grounded and has no voltage level. Digital signals are easy to read and can be combined with other digital signals to create unique codes, as in Serial data transmission. This type of signal can be compared to a push-button switch - when you press the button the signal is 1, when you release the button the signal is 0.
+
+Analog - refers to an electrical signal that is somewhere between Ground and VCC. This type of signal is commonly compared to a Potentiometer (volume knob), as the output is somewhere between the high and low.
+
+Arduino related:
+
+Comments - You will commonly see "//" in Arduino code to denote a comment. Anytime you see "//" followed by some text (eg. // some comment here), the text is considered a comment and is not processed by the Arduino compiler. If you are writing code into your IDE from this book, you can ommit the comments as they are only for reference.
+
+IDE - this term refers to the Arduino's special Integrated Development Environment (IDE), which is how most people upload code to the Arduino. This is essentially a program that has a text editor for you to enter code, a syntax highlighter to make your code more readable, syntax checker, upload button, and settings menu that you can select what Arduino you are using and which USB port you are connected to. Each version of the IDE on the Arduino website is different... if you have an issue compiling someone's code, first check to see what version of the Arduino IDE they used to compile and make sure you are using the same.
+
+PWM - Pulse Width Modulation refers to the process of emulating an Analog signal by means of high-speed digital signals. By keeping a consistent frequency between each switching cycle (eg. 1000hertz = 1000 switching cycles per second), the digital signal can be HIGH part of each switching cycle (which at 1000 hertz would be 1 millisecond each cycle) and LOW the rest of the time. The "duty-cycle" shows the ratio of On/Off time during each switching cycle. A 70% duty cycle would imply that the signal was On for 0.7 milliseconds and Off for 0.3 milliseconds each cycle. Because the digital signal is switching so fast, it appears to most devices as an Analog signal. This is the preferred (most efficient) method of controlling the speed of DC motors. 
+
+

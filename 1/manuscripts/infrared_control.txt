@@ -1,0 +1,60 @@
+Chapter 1: Infrared Control Robot                                                                                                                                                                                                            
+
+Intro
+
+  In this chapter, we will use a standard motorized platform in conjunction with an Arduino, Infrared receiver, motor-controller, and Infrared Remote to control the robot. At the end of this chapter, you should understand the concepts behind infrared data transmission, serial data transfer, data arrays, and case statements. Now on to the fun stuff.
+
+  Infrared data transmission is shockingly simple to implement and equally as cheap. To send a signal using infrared light, you will need two devices: an infrared emitter and an infrared detector. The emitter is nothing more than an LED that only emits light in a specific spectrum (the infrared spectrum) - though these LED's are powered the same way as a normal LED, the light that is emitted is undetectable to the human eye (that is, you can't see it) and must be viewed using a digital camera or other filtering device. The infrared detector is actually a transistor switch that uses infrared light to activate its Base pin, instead of electrical current or voltage.
+
+  As you may recall, a transistor is a solid-state electrical switch that can be turned On and Off thousands of times every second. The speed at which the infrared detector can read infrared signals is ideal for low bandwidth data transfer using a string of binary data (0's and 1's). To put it more simply, the typical infrared emitter device (remote control for your TV) sends out about 20 or so "bits" each time you press a button. Each of these 20 bits in the string of data can be read individually or as a group to determine the desired output from the TV. Usually these bits will be read as a specific code to represent different functions on your TV, like changing the volume, channel, menu options, etc...
+
+  Furthermore, to avoid signal noise and interference, most Infrared control devices are tuned to a specific frequency when they transmit signals (similar to a Serial data transfer speed - eg. 9600bps) so that the receiving transistor knows to only listen to infrared signals that are transmitted at that same frequency (usually 38kHz). This means that you can buy a special infrared detector that has a logic chip built-in to ignore non-control related infrared light. These detectors can be found in nearly any VCR, DVD player, TV, or other remotely controlled indoor appliance - and can easily be read using your Arduino. Radio Shack also sells these Infrared Receiver Modules for about $4 each (part #276-640). The receiver contains 3 pins - +5v, GND, and Input. Simply connect these pins to your Arduino, and you can read the input of the IR module from any Arduino I/O pin.
+
+Converting light into data
+
+  To convert a blink of light into a binary "bit", we must first read the length of each pulse of light (in microseconds) as detected by the IR receiver module to determine whether it is intended to be read as a "0" or a "1" bit. The IR receiver module will convert infrared light received into a pulse of electricity that is either 500mS (logic "0") in duration or around 1100mS (logic "1"), depending on the intended bit. The pulseIn() command is quite nifty when trying to read and record the length of a pulse of electricity on the Arduino, because it does so in Microseconds which is generally plenty of resolution for the type of signals we will be decoding.
+
+    void pulse(){
+      pulse_val = pulseIn(pulse_pin, HIGH, 10000);
+    }
+
+As you can see, the void pulse() function simply sets a variable called "pulse_val" equal to the pulse reading of the IR receiver pin. Though it is not evident from the code above, this pulse function will get called about 20 times every time a signal is sent to the Arduino, in order to build a code using each pulse as a data bit.
+
+Once we have determined that this is the way things work, it is fairly easy to write a small function to convert these pulse durations into binary bits. Since a binary bit value type is called a "boolean", I named the function to convert these values "booleanize":
+
+    void booleanize(){
+      // this function changes the pulse readings of 500 microseconds and 1100 microseconds (the only 2 pulse lengths I could detect) into 0 or 1 boolean values.
+      if (pulse_val > 750){
+        pulse_val = 1;
+      }
+      else {
+        pulse_val = 0;
+      }
+    }
+
+Now then... that was easy, right? We know that a boolean value can only be either 1 or 0, and we knew that the observed pulse length was either 500mS or 1100mS, so I just picked a value near the middle (750mS) to see if the pulse_val was above or below that and then assigned a 1 or 0 to the value accordingly. Congratulations, you've just been booleanized.
+
+After determining what data each pulse is intended to represent, we must make sure we capture each piece of data that is sent across every time a complete signal is transmitted. To do this, we must use an extremely useful data type called an "Array". An array is a list of objects that can be accessed using what is called an index. The index number can be called to check the value of the object in that position of the array. In programming, array indexes start at 0 instead of 1, so that is important to remember. Typically an array might look like this:
+
+    test_array = ["first_element", "second_element", "third_element"]
+
+Where: test_array[0] would return
+
+    "first_element"
+
+And: test_array[2] would return
+
+    "third_element"
+
+So, with this in mind, we can create an array of boolean values that are obtained from pulses of infrared light during each transmission of data read by the IR receiver module. To make the array using a series of individual pulse readings, we must do some programming fanciness:
+
+    if (pulse_val > 0){
+      digitalWrite(ledPin, HIGH);
+      // if so, lets start reading the pulses
+      reading = true;
+      booleanize();
+      // put each of the 20 or so readings into an array
+      ir_array[n] = pulse_val;
+      // cycle the counter up one to continue through the array
+      n++;
+    }
