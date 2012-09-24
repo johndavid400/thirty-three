@@ -15,9 +15,9 @@ Analog - refers to an electrical signal that is somewhere between Ground and VCC
 
 Arduino related:
 
-Comments - You will commonly see "//" in Arduino code to denote a comment. Anytime you see "//" followed by some text (eg. // some comment here), the text is considered a comment and is not processed by the Arduino compiler. If you are writing code into your IDE from this book, you can ommit the comments as they are only for reference.
-
 IDE - this term refers to the Arduino's special Integrated Development Environment (IDE), which is how most people upload code to the Arduino. This is essentially a program that has a text editor for you to enter code, a syntax highlighter to make your code more readable, syntax checker, upload button, and settings menu that you can select what Arduino you are using and which USB port you are connected to. Each version of the IDE on the Arduino website is different... if you have an issue compiling someone's code, first check to see what version of the Arduino IDE they used to compile and make sure you are using the same.
+
+Comments - You will commonly see "//" in Arduino code to denote a comment. Anytime you see "//" followed by some text (eg. // some comment here), the text is considered a comment and is not processed by the Arduino compiler. If you are writing code into your IDE from this book, you can ommit the comments as they are only for reference.
 
 PWM - Pulse Width Modulation refers to the process of emulating an Analog signal by means of high-speed digital signals. By keeping a consistent frequency between each switching cycle (eg. 1000hertz = 1000 switching cycles per second), the digital signal can be HIGH part of each switching cycle (which at 1000 hertz would be 1 millisecond each cycle) and LOW the rest of the time. The "duty-cycle" shows the ratio of On/Off time during each switching cycle. A 70% duty cycle would imply that the signal was On for 0.7 milliseconds and Off for 0.3 milliseconds each cycle. Because the digital signal is switching so fast, it appears to most devices as an Analog signal. This is the preferred (most efficient) method of controlling the speed of DC motors. 
 
