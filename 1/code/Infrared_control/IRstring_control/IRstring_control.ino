@@ -1,33 +1,31 @@
-// This code is intended to decode an Infrared helicopter remote using a standard IR receiver from Radio Shack using Interrupts
+// This code is intended to decode an Infrared remote using a standard Infrared receiver  from Radio Shack
 // This code is tested on an Arduino Mega
-// connect 
-// JDW 2011
+// Connect the IR detector input pin to Arduino D
+// JDW 2012
 
 int ledPin = 13; // optional LED on pin 13
-int pulse_pin = 14; // connect IR receiver - I used pin 21, but you can change this if using a regular Arduino, any pin will work.
-int pulse_val = 0;
-boolean reading = false;
-
-int n = 0;
-int loop_counter = 0;
-
-String IRstring = "";
+int pulse_pin = 12; // connect IR receiver - I used pin 21, but you can change this if using a regular Arduino, any pin will work.
+int pulse_val = 0; // create a variable for the pulse values from the IR detector
+boolean reading = false; // a variable to check and see if the last available pulse was recently
+int loop_counter = 0; // counter to check loop cycles
+String IRstring = ""; // initiate an empty String object
 
 void setup() {   
-  // start serial monitor
+  // start serial monitor at 9600 bits per second
   Serial.begin(9600);
-  //led on arduino pin 13
+  // create OUTPUT for led on arduino pin 13
   pinMode(ledPin, OUTPUT);
-  // IR signal from helicopter controller
+  // input pulse signal from infrared remote
   pinMode(pulse_pin, INPUT);
 }
 
 void pulse(){
+  // use the pulseIn() function to check the length of each pulse
   pulse_val = pulseIn(pulse_pin, HIGH, 10000);
 }
 
 void booleanize(){
-  // this function changes the pulse readings of 500 microseconds and 1100 microseconds (the only 2 pulse lengths I could detect) into 1 or 0 boolean values.
+  // this function changes the pulse readings of 500 microseconds and 1100 microseconds into 0 or 1 boolean values.
   if (pulse_val > 750){
     pulse_val = 1;
   }
@@ -37,62 +35,37 @@ void booleanize(){
 }
 
 void loop() {
-  // get a pulse reading from the IR sensor
-  
-   pulse();
-
-  // now check to see if it is above 0
+   pulse(); // get a pulse reading from the IR sensor
+  // now check to see if it is a pulse was read
   if (pulse_val > 0){
-    digitalWrite(ledPin, HIGH);
-    // if so, lets start reading the pulses
-    reading = true;
-    booleanize();
-    // append each new value to a string data object instead of an array
-    IRstring = IRstring + pulse_val;
-    loop_counter = 0;
+    digitalWrite(ledPin, HIGH); // when a pulse is being read, turn on the LED on pin 13
+    reading = true; // assert that we are still reading signals
+    booleanize(); // convert each pulse into a boolean 0 or 1
+    IRstring = IRstring + pulse_val; // append each new value to a string data object instead of an array
+    loop_counter = 0; // since we just read a pulse, reset the pulse counter to 0
   }
   // if the pulse is not greater than 0...
   else {
-    // if this is the first 0 reading after a set of pulses, go ahead and close the set out and read the pulses
+    // if this is the first 0 reading after a set of pulses, go ahead and close the string out and read the pulses
     if (reading == true){
-      // read and decode pulses
-      //decode_speed();
-      // check for turn
-      //decode_turn();
-      // check for button
-      //decode_button();
-      // check and limit the signal so no bad value is written to the H-bridge (above 255)
-      //limit_signal();
-      // finally, write the values to the motors
-      //write_motors();
-      
-      Serial.print(IRstring);
-      Serial.println("");
+      Serial.print("RAW: ");
+      Serial.print(IRstring); // Print the full String
+      Serial.print("    THR: ");  
+      Serial.print(IRstring.substring(7,11)); // Print the part of the string relevant to the Throttle
+      Serial.print("    DIR: ");
+      Serial.print(IRstring.substring(15,18)); // Print the part of the string relevant to the Direction
+      Serial.print("    BUT: ");
+      Serial.println(IRstring.substring(11,15)); // Print the part of the string relevant to the Button
+      IRstring = "";  // set the string object to be empty ""
     }
-    reading = false;
-    loop_counter++;
-    // make sure it has not received a signal in a few seconds before stopping.
+    reading = false; // since we are no longer reading a pulse anymore, set the reading value to false
+    loop_counter++; // increment the loop counter
+    // check to see if the loop count has reached 50 without receiving a signal
     if (loop_counter > 50){
-      //m1_stop();
-      //m2_stop();
-      loop_counter = 0;
+      loop_counter = 0; // if so, reset the counter
     }
   }
-  digitalWrite(ledPin, LOW);
+  digitalWrite(ledPin, LOW); // turn off the LED
 }
 
-void write_motors(){
-}
-
-void limit_signal(){
-}
-
-void decode_turn(){
-}
-
-void decode_button(){
-}
-
-void decode_speed(){
-}
 
