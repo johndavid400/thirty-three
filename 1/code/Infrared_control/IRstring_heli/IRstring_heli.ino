@@ -10,13 +10,46 @@ boolean reading = false; // a variable to check and see if the last available pu
 int loop_counter = 0; // counter to check loop cycles
 String IRstring = ""; // initiate an empty String object
 
-int m1_A = 8;     //define I1 interface
-int m1_B = 11;    //define I2 interface 
-int m1_pwm = 9;   //enable motor A
+int speed_val = 0;
+int turn_val = 0;
+int m1_val = 0;
+int m2_val = 0;
 
-int m2_A = 12;    //define I3 interface 
-int m2_B = 13;    //define I4 interface 
-int m2_pwm = 10;  //enable motor B
+int m1_dir = 12;  // motor 1 direction 
+int m1_pwm = 3;   // motor 1 speed
+
+int m2_dir = 13;  // motor 2 direction
+int m2_pwm = 11;  // motor 2 speed
+
+int speed_multiplier = 19; // this value determines how much to multiply the speed increment by. Get this number by dividing 255 (total PWM resolution) by the number of speed steps (or resolution) available - in this case 14.
+
+// speed codes are contained in indexes 7, 8, 9, & 10
+String speed1 = "0000";
+String speed2 = "0010";
+String speed3 = "0011";
+String speed4 = "0100";
+String speed5 = "0101";
+String speed6 = "0110";
+String speed7 = "0111";
+String speed8 = "1000";
+String speed9 = "1001";
+String speed10 = "1010";
+String speed11 = "1011";
+String speed12 = "1100";
+String speed13 = "1101";
+String speed14 = "1110";
+
+// turning codes are contained in indexes 15, 16, & 17
+String left1 = "111";
+String left2 = "110";
+String left3 = "101";
+String right1 = "001";
+String right2 = "010";
+String right3 = "011";
+
+// button codes are contained in indexes 11, 12, and 13
+String button_left = "111";
+String button_right = "000";
 
 void setup() {   
   // start serial monitor at 9600 bits per second
@@ -26,11 +59,9 @@ void setup() {
   // input pulse signal from infrared remote
   pinMode(pulse_pin, INPUT);
   // Create motor outputs
-  pinMode(m1_A, OUTPUT);
-  pinMode(m1_B, OUTPUT);
+  pinMode(m1_dir, OUTPUT);
   pinMode(m1_pwm, OUTPUT);
-  pinMode(m2_A, OUTPUT);
-  pinMode(m2_B, OUTPUT);
+  pinMode(m2_dir, OUTPUT);
   pinMode(m2_pwm, OUTPUT);  
 }
 
@@ -70,37 +101,130 @@ void loop() {
     loop_counter++; // increment the loop counter
     // check to see if the loop count has reached 50 without receiving a signal
     if (loop_counter > 50){
+      m1_stop();
+      m2_stop();
       loop_counter = 0; // if so, reset the counter
     }
   }
   digitalWrite(ledPin, LOW); // turn off the LED
 
-
-  switch (8) {
-  case '010':    
-    digitalWrite(2, HIGH);
-    break;
-  case 'b':    
-    digitalWrite(3, HIGH);
-    break;
-  case 'c':    
-    digitalWrite(4, HIGH);
-    break;
-  case 'd':    
-    digitalWrite(5, HIGH);
-    break;
-  case 'e':    
-    digitalWrite(6, HIGH);
-    break;
-  default:
-    // turn all the LEDs off:
-    for (int thisPin = 2; thisPin < 7; thisPin++) {
-      digitalWrite(thisPin, LOW);
-    }
-  } 
-
-
+  decode_speed();
+  // check for turn
+  decode_turn();
+  // check for button
+  decode_button();
+  // check and limit the signal so no bad value is written to the H-bridge (above 255)
+  limit_signal();
+  // finally, write the values to the motors
+  write_motors();
 }
 
 
- 
+void write_motors(){
+  // check direction of m1_val and write appropriately
+  if (m1_val > 0){
+    m1_forward(m1_val);
+  }
+  else if (m1_val < 0){
+    m1_reverse(-m1_val);
+  }
+  else {
+    m1_stop();
+  }
+  // check direction of m2_val and write appropriately
+  if (m2_val > 0){
+    m2_forward(m2_val);
+  }
+  else if (m2_val < 0){
+    m2_reverse(-m2_val);
+  }
+  else {
+    m2_stop();
+  }
+}
+
+void limit_signal(){
+  if (m1_val > 255){
+    m1_val = 255;
+  }
+  else if (m1_val < -255){
+    m1_val = -255;
+  }
+  if (m2_val > 255){
+    m2_val = 255;
+  }
+  else if (m2_val < -255){
+    m2_val = -255;
+  }
+}
+
+void decode_turn(){
+  // turn
+  if      (IRstring.substring(15,18) == left1){turn_val = -1;}
+  else if (IRstring.substring(15,18) == left2){turn_val = -2;}
+  else if (IRstring.substring(15,18) == left3){turn_val = -3;}
+  else if (IRstring.substring(15,18) == right1){turn_val = 1;}
+  else if (IRstring.substring(15,18) == right2){turn_val = 2;}
+  else if (IRstring.substring(15,18) == right3){turn_val = 3;}
+  else    {turn_val = 0;}
+}
+
+
+void decode_speed(){
+  // speed
+  if      (IRstring.substring(7,11) == speed1){speed_val = 1;}
+  else if (IRstring.substring(7,11) == speed2){speed_val = 2;}
+  else if (IRstring.substring(7,11) == speed3){speed_val = 3;}
+  else if (IRstring.substring(7,11) == speed4){speed_val = 4;}
+  else if (IRstring.substring(7,11) == speed5){speed_val = 5;}
+  else if (IRstring.substring(7,11) == speed6){speed_val = 6;}
+  else if (IRstring.substring(7,11) == speed7){speed_val = 7;}
+  else if (IRstring.substring(7,11) == speed8){speed_val = 8;}
+  else if (IRstring.substring(7,11) == speed9){speed_val = 9;}
+  else if (IRstring.substring(7,11) == speed10){speed_val = 10;}
+  else if (IRstring.substring(7,11) == speed11){speed_val = 11;}
+  else if (IRstring.substring(7,11) == speed12){speed_val = 12;}
+  else if (IRstring.substring(7,11) == speed13){speed_val = 13;}
+  else if (IRstring.substring(7,11) == speed14){speed_val = 14;}
+}
+
+void decode_button(){
+  // button
+  if (IRstring.substring(11,14) == button_left){
+    // left button
+    m1_val = -m1_val;
+    m2_val = -m2_val;
+  }
+}
+
+
+
+void m1_forward(int pwm_speed){
+  digitalWrite(m1_dir, HIGH);
+  analogWrite(m1_pwm, pwm_speed);
+}
+void m1_reverse(int pwm_speed){
+  digitalWrite(m1_dir, LOW);
+  analogWrite(m1_pwm, pwm_speed);
+}
+void m1_stop(){
+  digitalWrite(m1_dir, LOW);
+  digitalWrite(m1_pwm, LOW);
+}
+
+void m2_forward(int pwm_speed){
+  digitalWrite(m2_dir, HIGH);
+  analogWrite(m2_pwm, pwm_speed);
+}
+void m2_reverse(int pwm_speed){
+  digitalWrite(m2_dir, LOW);
+  analogWrite(m2_pwm, pwm_speed);
+}
+void m2_stop(){
+  digitalWrite(m2_dir, LOW);
+  digitalWrite(m2_pwm, LOW);
+}
+
+
+
+
