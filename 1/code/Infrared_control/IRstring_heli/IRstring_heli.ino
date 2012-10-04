@@ -6,7 +6,7 @@
 // JDW 2012
 
 // create variables for pulse, boolean values, loop cycle counter, and the String object that we will use to hold the Infrared code.
-int pulse_pin = 6; // connect IR receiver - I used pin 6, but you can change this, any pin will work.
+int pulse_pin = 14; // connect IR receiver - I used pin 6, but you can change this, any pin will work.
 int pulse_val = 0; // create a variable for the pulse values from the IR detector
 boolean reading = false; // a variable to check and see if the last available pulse was recently - a boolean variable can only be either true or false
 int loop_counter = 0; // counter to check number of loop cycles since we last received a pulse from the IR receiver
@@ -52,8 +52,8 @@ String right2 = "010";
 String right3 = "011";
 
 // button codes are contained in indexes 11, 12, and 13
-String button_left = "111";
-String button_right = "000";
+String button_left = "1111";
+String button_right = "0001";
 
 
 void setup() {
@@ -195,7 +195,7 @@ void decode_turn(){
 void decode_button(){
   // check button to see if being pushed
   // if so, we will use this for reverse by making the speed value negative
-  if (IRstring.substring(11,14) == button_left){
+  if (IRstring.substring(11,15) == button_left){
     // left button was pushed.. we are not currently checking for the right button 
     m1_val = -m1_val; // set the current speed value for each motor negative
     m2_val = -m2_val; // setting the value negative, makes that motor go in reverse
