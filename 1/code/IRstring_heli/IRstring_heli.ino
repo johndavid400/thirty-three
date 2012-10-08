@@ -6,12 +6,12 @@
 // JDW 2012
 
 // create variables for pulse, boolean values, loop cycle counter, and the String object that we will use to hold the Infrared code.
-int pulse_pin = 14; // connect IR receiver - I used pin 6, but you can change this, any pin will work.
+int pulse_pin = 6; // connect IR receiver - I used pin 6, but you can change this, any digital pin will work (I had issues using Analog pins).
 int pulse_val = 0; // create a variable for the pulse values from the IR detector
 boolean reading = false; // a variable to check and see if the last available pulse was recently - a boolean variable can only be either true or false
 int loop_counter = 0; // counter to check number of loop cycles since we last received a pulse from the IR receiver
 String IRstring = ""; // initiate an empty String object to hold boolean values
-int string_length = 20;
+int string_length = 20; // the total number of characters in each string (observed on serial monitor)
 
 // make variables to hold speed, turn, and motor pwm values
 int speed_val = 0;  // variable to hold the overall speed value
